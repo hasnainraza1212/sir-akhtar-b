@@ -2,11 +2,9 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import fetch from "node-fetch"
+import { generateOTP, sendOtp } from '../sendPulse/sendPulse.js';
+import { mail } from '../nodeMailer/nodeMailer.js';
 dotenv.config();
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-};
 
 // Function to verify reCAPTCHA token
 const verifyRecaptchaToken = async (token) => {
@@ -26,19 +24,20 @@ const verifyRecaptchaToken = async (token) => {
   }
 };
 
+
 export const registerUser = async (req, res) => {
   const { username, email, password, token } = req.body;
 
   try {
     // Verify reCAPTCHA token
-    const isHuman = await verifyRecaptchaToken(token);
-    if (!isHuman) {
-      return res.status(400).json({
-        success: false,
-        status: 400,
-        message: 'reCAPTCHA verification failed',
-      });
-    }
+    // const isHuman = await verifyRecaptchaToken(token);
+    // if (!isHuman) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     status: 400,
+    //     message: 'reCAPTCHA verification failed',
+    //   });
+    // }
 
     const userExists = await User.findOne({ email });
 
@@ -51,7 +50,7 @@ export const registerUser = async (req, res) => {
     }
 
     const user = await User.create({ username, email, password });
-
+   const messagesent =await  sendOtp("+923172922032", generateOTP())
     if (user) {
       res.status(201).json({
         success: true,
@@ -61,10 +60,15 @@ export const registerUser = async (req, res) => {
           username: user.username,
           email: user.email,
           type: user.type,
+          emailVerificationStatus:user.emailVerificationStatus,
+          phoneVerificationStatus:user.phoneVerificationStatus
         },
-        token: generateToken(user._id),
+        refreshToken :await user.generateRefreshToken(),
+        accessToken :await user.generateAccessToken(),
         message:"Signup successfully."
       });
+      console.log(messagesent)
+      mail("studyspace.pk" ,"hr961992@gmail.com", "Please Verify Your Email.",user?._id, user?.username )
     } else {
       res.status(400).json({
         success: false,
@@ -81,23 +85,33 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
 export const authUser = async (req, res) => {
   const { email, password, token } = req.body;
 
   try {
     // Verify reCAPTCHA token
-    const isHuman = await verifyRecaptchaToken(token);
-    if (!isHuman) {
-      return res.status(400).json({
-        success: false,
-        status: 400,
-        message: 'reCAPTCHA verification failed',
-      });
-    }
+    // const isHuman = await verifyRecaptchaToken(token);
+    // if (!isHuman) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     status: 400,
+    //     message: 'reCAPTCHA verification failed',
+    //   });
+    // }
 
     const user = await User.findOne({ email });
+    const isPasswordMatched = await user.matchPassword(password)
 
-    if (user && (await user.matchPassword(password))) {
+    if (user && isPasswordMatched) {
+      console.log("user.generateRefreshToken()", await user.generateRefreshToken())
+      if (!user.emailVerificationStatus){
+        console.log(user.email)
+        mail("studyspace.pk" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
+      }
+      const refreshToken= await user.generateRefreshToken()
+      user.refreshToken = refreshToken
+      await user.save({ validateBeforeSave: false });
       res.json({
         success: true,
         status: 200,
@@ -106,8 +120,11 @@ export const authUser = async (req, res) => {
           username: user.username,
           email: user.email,
           type: user.type,
+          emailVerificationStatus:user.emailVerificationStatus,
+          phoneVerificationStatus:user.phoneVerificationStatus
         },
-        token: generateToken(user._id),
+        refreshToken :refreshToken,
+        accessToken :await user.generateAccessToken(),
         message:"Login successfully."
       });
     } else {
@@ -125,3 +142,30 @@ export const authUser = async (req, res) => {
     });
   }
 };
+
+export const refreshAccessToken= (req, res)=>{
+try{
+  const {refreshToken} = req.body
+  if(!refreshToken){
+    return res.status(403).send({status:403, message:"Refresh token not provided."})
+  }
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async function(error, decoded){
+    if(error){
+      return res.status(403).send({status:403, message:"JWT ERROR: Invalid Refresh token provided.", success:false})
+    }
+    let user =await User.findOne({email:decoded?.email}).select("-password -refreshToken")
+    if(!user){
+      return res.status(403).send({status:403, message:"MONGOOSE ERROR: Invalid refresh token provided."})
+    }
+    if(refreshToken !== user?.refreshToken){
+      return res.status(403).send({status:403, message:"MONGOOSE AND JWT ERROR:Invalid refresh token provided, provided token doesn't match with Mongoose Token.", success:false})
+    }
+    user = user.toObject() 
+    const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"30d"})
+    return res.status(200).send({status:200, message:"Access token refreshed successfully.", success:true, accessToken})
+  })
+
+}catch(error){
+  return res.status(500).send({status:500,message:"Internal server error", success:false })
+}
+}

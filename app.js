@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
-
+import verificationRoutes from "./routes/verificationRoute.js"
 import cors from "cors"
 import winston from 'winston';
 import expressWinston from 'express-winston';
@@ -12,16 +12,24 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(express.json());
 
 const corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200
+  origin: ['http://localhost:5173', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+    optionsSuccessStatus: 200,
+    credentials: true,
+    methods: ['GET', 'POST'],
   };
   
-  app.use(cors(corsOptions));
+app.use(cors(corsOptions));
+// for development
 
+app.use(express.json());
 
+  app.use(
+    express.json({
+      limit: "16kb",
+    })
+  );
 
 // Set up Winston loggers
 const requestLogger = winston.createLogger({
@@ -125,7 +133,13 @@ app.use((req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/content', categoryRoutes);
-
+app.use('/api/verification', verificationRoutes);
+app.get("/", (req,res)=>{
+  return res.send({message:"api working"})
+})
+app.use('*', (req, res) => {
+  res.status(404).send({ success:false , message: "Route not found" , status:404,});
+});
 
   
 app.use((req, res, next) => {
