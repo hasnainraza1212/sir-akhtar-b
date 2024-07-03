@@ -14,7 +14,7 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+  origin: ['http://localhost:5173', 'http://localhost:5500', 'http://127.0.0.1:5500','https://study-space-akhtar-raza.vercel.app'],
     optionsSuccessStatus: 200,
     credentials: true,
     methods: ['GET', 'POST'],
