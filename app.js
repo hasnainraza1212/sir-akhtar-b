@@ -32,104 +32,104 @@ app.use(express.json());
   );
 
 // Set up Winston loggers
-const requestLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin }) => {
-    return JSON.stringify({
-      host,
-      level,
-      message,
-      method,
-      origin,
-      time,
-      timestamp,
-      url,
-    });
-  }),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/requests.log', level: 'info' }),
-  ],
-});
+// const requestLogger = winston.createLogger({
+//   level: 'info',
+//   format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin }) => {
+//     return JSON.stringify({
+//       host,
+//       level,
+//       message,
+//       method,
+//       origin,
+//       time,
+//       timestamp,
+//       url,
+//     });
+//   }),
+//   transports: [
+//     new winston.transports.Console(),
+//     new winston.transports.File({ filename: 'logs/requests.log', level: 'info' }),
+//   ],
+// });
 
-const responseLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin, response }) => {
-    return JSON.stringify({
-      host,
-      level,
-      message,
-      method,
-      origin,
-      response,
-      time,
-      timestamp,
-      url,
-    });
-  }),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/responses.log', level: 'info' }),
-  ],
-});
+// const responseLogger = winston.createLogger({
+//   level: 'info',
+//   format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin, response }) => {
+//     return JSON.stringify({
+//       host,
+//       level,
+//       message,
+//       method,
+//       origin,
+//       response,
+//       time,
+//       timestamp,
+//       url,
+//     });
+//   }),
+//   transports: [
+//     new winston.transports.Console(),
+//     new winston.transports.File({ filename: 'logs/responses.log', level: 'info' }),
+//   ],
+// });
 
-const errorLogger = winston.createLogger({
-  level: 'error',
-  format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin, stack }) => {
-    return JSON.stringify({
-      host,
-      level,
-      message,
-      method,
-      origin,
-      time,
-      timestamp,
-      url,
-      stack,
-    });
-  }),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-  ],
-});
+// const errorLogger = winston.createLogger({
+//   level: 'error',
+//   format: winston.format.printf(({ level, message, method, time, timestamp, url, host, origin, stack }) => {
+//     return JSON.stringify({
+//       host,
+//       level,
+//       message,
+//       method,
+//       origin,
+//       time,
+//       timestamp,
+//       url,
+//       stack,
+//     });
+//   }),
+//   transports: [
+//     new winston.transports.Console(),
+//     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+//   ],
+// });
 
 // Custom middleware to log request details
-app.use((req, res, next) => {
-  requestLogger.info({
-    host: req.headers.host,
-    level: 'info',
-    message: 'HTTP Request',
-    method: req.method,
-    origin: req.headers.origin,
-    time: new Date().toISOString(),
-    timestamp: new Date().toISOString(),
-    url: req.url,
-  });
-  next();
-});
+// app.use((req, res, next) => {
+//   requestLogger.info({
+//     host: req.headers.host,
+//     level: 'info',
+//     message: 'HTTP Request',
+//     method: req.method,
+//     origin: req.headers.origin,
+//     time: new Date().toISOString(),
+//     timestamp: new Date().toISOString(),
+//     url: req.url,
+//   });
+//   next();
+// });
 
 // Middleware for logging responses
-app.use((req, res, next) => {
-  const originalSend = res.send;
+// app.use((req, res, next) => {
+//   const originalSend = res.send;
 
-  res.send = function (body) {
-    responseLogger.info({
-      host: req.headers.host,
-      level: 'info',
-      message: 'HTTP Response',
-      method: req.method,
-      origin: req.headers.origin,
-      response: body,
-      time: new Date().toISOString(),
-      timestamp: new Date().toISOString(),
-      url: req.url,
-    });
+//   res.send = function (body) {
+//     responseLogger.info({
+//       host: req.headers.host,
+//       level: 'info',
+//       message: 'HTTP Response',
+//       method: req.method,
+//       origin: req.headers.origin,
+//       response: body,
+//       time: new Date().toISOString(),
+//       timestamp: new Date().toISOString(),
+//       url: req.url,
+//     });
 
-    return originalSend.call(this, body);
-  };
-  next();
-});
+//     return originalSend.call(this, body);
+//   };
+//   next();
+// });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/content', categoryRoutes);
