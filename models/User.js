@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     phoneVerificationStatus:{
       type:Boolean,
-      default:false
+      default:true
     },
     emailVerificationStatus:{
       type:Boolean,
