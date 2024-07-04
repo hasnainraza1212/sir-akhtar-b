@@ -101,7 +101,14 @@ export const authUser = async (req, res) => {
     // }
 
     const user = await User.findOne({ email });
-    const isPasswordMatched = await user.matchPassword(password)
+    if (!user){
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message:"user not found."
+    })
+  }
+    const isPasswordMatched = await user?.matchPassword(password)
 
     if (user && isPasswordMatched) {
       console.log("user.generateRefreshToken()", await user.generateRefreshToken())
@@ -169,3 +176,29 @@ try{
   return res.status(500).send({status:500,message:"Internal server error", success:false })
 }
 }
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { _id } = req?.user;
+    if (!_id) {
+      return res.status(403).send({ status: 403, message: "_id not found." });
+    }
+
+    const deleteUser = await User.findByIdAndDelete(_id);
+    if (!deleteUser) {
+      return res.status(400).json({
+        status: 400,
+        message: "Failed to delete the user."
+      });
+    }
+    return res.status(200).json({
+      status: 200,
+      message: "User deleted successfully.",
+      user: deleteUser
+    });
+  } catch (error) {
+    return res.status(500).send({ status: 500, message: "Internal server error", success: false });
+  }
+};
+
+  

@@ -1,6 +1,6 @@
 // routes/authRoutes.js
 import express from 'express';
-import { registerUser, authUser, refreshAccessToken } from '../controllers/authController.js';
+import { registerUser, authUser, refreshAccessToken, deleteUser } from '../controllers/authController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -18,4 +18,5 @@ router.get('/profile',protect,(req, res) => {
   });
 });
 
+router.post('/delete-user',protect,deleteUser);
 export default router;
