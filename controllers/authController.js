@@ -50,7 +50,7 @@ export const registerUser = async (req, res) => {
     }
 
     const user = await User.create({ username, email, password });
-   const messagesent =await  sendOtp("+923172922032", generateOTP())
+  //  const messagesent =await  sendOtp("+923172922032", generateOTP())
     if (user) {
       res.status(201).json({
         success: true,
@@ -67,8 +67,8 @@ export const registerUser = async (req, res) => {
         accessToken :await user.generateAccessToken(),
         message:"Signup successfully."
       });
-      console.log(messagesent)
-      mail("studyspace.pk" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
+      // console.log(messagesent)
+     await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
     } else {
       res.status(400).json({
         success: false,
@@ -106,8 +106,8 @@ export const authUser = async (req, res) => {
     if (user && isPasswordMatched) {
       console.log("user.generateRefreshToken()", await user.generateRefreshToken())
       if (!user.emailVerificationStatus){
-        console.log(user.email)
-        mail("studyspace.pk" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
+        // console.log(user.email)
+       await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
       }
       const refreshToken= await user.generateRefreshToken()
       user.refreshToken = refreshToken
