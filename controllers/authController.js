@@ -68,7 +68,7 @@ export const registerUser = async (req, res) => {
         message:"Signup successfully."
       });
       console.log(messagesent)
-      mail("studyspace.pk" ,"hr961992@gmail.com", "Please Verify Your Email.",user?._id, user?.username )
+      mail("studyspace.pk" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
     } else {
       res.status(400).json({
         success: false,
