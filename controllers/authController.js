@@ -30,14 +30,14 @@ export const registerUser = async (req, res) => {
 
   try {
     // Verify reCAPTCHA token
-    // const isHuman = await verifyRecaptchaToken(token);
-    // if (!isHuman) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     status: 400,
-    //     message: 'reCAPTCHA verification failed',
-    //   });
-    // }
+    const isHuman = await verifyRecaptchaToken(token);
+    if (!isHuman) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: 'reCAPTCHA verification failed',
+      });
+    }
 
     const userExists = await User.findOne({ email });
 
@@ -98,14 +98,14 @@ export const authUser = async (req, res) => {
 
   try {
     // Verify reCAPTCHA token
-    // const isHuman = await verifyRecaptchaToken(token);
-    // if (!isHuman) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     status: 400,
-    //     message: 'reCAPTCHA verification failed',
-    //   });
-    // }
+    const isHuman = await verifyRecaptchaToken(token);
+    if (!isHuman) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: 'reCAPTCHA verification failed',
+      });
+    }
 
     const user = await User.findOne({ email });
     if (!user){
