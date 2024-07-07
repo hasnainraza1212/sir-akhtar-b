@@ -51,7 +51,8 @@ userSchema.methods.generateAccessToken=async function(){
   delete user?.password
   delete user?.refreshToken
   delete user?.accessToken
-  const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"30d"})
+  const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"3m"})
+  console.log("accessToken", accessToken)
   return accessToken
 
 }
@@ -61,6 +62,7 @@ userSchema.methods.generateRefreshToken=async function(){
   delete user?.refreshToken
   delete user?.accessToken
   const refreshToken = jwt.sign(user, process.env.JWT_REFRESH_TOKEN_SECRET, {expiresIn:"365d"})
+  console.log("refreshToken", refreshToken)
   return refreshToken
 
 }

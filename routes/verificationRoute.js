@@ -13,8 +13,8 @@ router.get("/status", protect, (req, res) => {
     status: 200,
     user,
     verificationStatus: {
-      phoneVerified: user?.phoneVerificationStatus,
-      emailVerified: user?.emailVerificationStatus,
+      phoneVerificationStatus: user?.phoneVerificationStatus,
+      emailVerificationStatus: user?.emailVerificationStatus,
     },
   });
 });

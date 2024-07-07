@@ -50,7 +50,14 @@ export const registerUser = async (req, res) => {
     }
 
     const user = await User.create({ username, email, password });
+    const refreshToken = await user.generateRefreshToken()
+    const accessToken =await user.generateAccessToken()
+    user.refreshToken = refreshToken
+    user.accessToken = accessToken
+   await user.save({ validateBeforeSave: false });
+
   //  const messagesent =await  sendOtp("+923172922032", generateOTP())
+  console.log("user", user)
     if (user) {
       res.status(201).json({
         success: true,
@@ -63,8 +70,8 @@ export const registerUser = async (req, res) => {
           emailVerificationStatus:user.emailVerificationStatus,
           phoneVerificationStatus:user.phoneVerificationStatus
         },
-        refreshToken :await user.generateRefreshToken(),
-        accessToken :await user.generateAccessToken(),
+        refreshToken:user.refreshToken,
+        accessToken:user.accessToken,
         message:"Signup successfully."
       });
       // console.log(messagesent)
@@ -170,7 +177,7 @@ try{
     user = user.toObject() 
     delete user.accessToken
     delete user.refreshToken
-    const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"30d"})
+    const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"3m"})
     return res.status(200).send({status:200, message:"Access token refreshed successfully.", success:true, accessToken})
   })
 

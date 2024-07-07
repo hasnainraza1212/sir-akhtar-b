@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-const host="https://study-space-akhtar-raza.vercel.app"
-// const host="http://localhost:5173"
+// const host="https://study-space-akhtar-raza.vercel.app"
+const host="http://localhost:5173"
 
 // Function to generate the email content
 const content = (id = "", username = "") => `
