@@ -68,16 +68,16 @@ export const registerUser = async (req, res) => {
         message:"Signup successfully."
       });
       // console.log(messagesent)
-     await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
+      return  await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
     } else {
-      res.status(400).json({
+    return  res.status(400).json({
         success: false,
         status: 400,
         message: 'Invalid user data',
       });
     }
   } catch (error) {
-    res.status(500).json({
+   return res.status(500).json({
       success: false,
       status: 500,
       message: error.message,
@@ -111,15 +111,15 @@ export const authUser = async (req, res) => {
     const isPasswordMatched = await user?.matchPassword(password)
 
     if (user && isPasswordMatched) {
-      console.log("user.generateRefreshToken()", await user.generateRefreshToken())
       if (!user.emailVerificationStatus){
-        // console.log(user.email)
        await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
       }
       const refreshToken= await user.generateRefreshToken()
-      user.refreshToken = refreshToken
-      await user.save({ validateBeforeSave: false });
-      res.json({
+      const accessToken = await user.generateAccessToken()
+      user.refreshToken = refreshToken;
+      user.accessToken = accessToken;
+   await user.save({ validateBeforeSave: false });
+     return res.status(200).json({
         success: true,
         status: 200,
         user: {
@@ -131,18 +131,18 @@ export const authUser = async (req, res) => {
           phoneVerificationStatus:user.phoneVerificationStatus
         },
         refreshToken :refreshToken,
-        accessToken :await user.generateAccessToken(),
+        accessToken :accessToken,
         message:"Login successfully."
       });
     } else {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         status: 401,
         message: 'Invalid email or password',
       });
     }
   } catch (error) {
-    res.status(500).json({
+   return res.status(500).json({
       success: false,
       status: 500,
       message: error.message,
@@ -160,7 +160,7 @@ try{
     if(error){
       return res.status(403).send({status:403, message:"JWT ERROR: Invalid Refresh token provided.", success:false})
     }
-    let user =await User.findOne({email:decoded?.email}).select("-password -refreshToken")
+    let user =await User.findOne({email:decoded?.email}).select("-password")
     if(!user){
       return res.status(403).send({status:403, message:"MONGOOSE ERROR: Invalid refresh token provided."})
     }
@@ -168,6 +168,8 @@ try{
       return res.status(403).send({status:403, message:"MONGOOSE AND JWT ERROR:Invalid refresh token provided, provided token doesn't match with Mongoose Token.", success:false})
     }
     user = user.toObject() 
+    delete user.accessToken
+    delete user.refreshToken
     const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"30d"})
     return res.status(200).send({status:200, message:"Access token refreshed successfully.", success:true, accessToken})
   })

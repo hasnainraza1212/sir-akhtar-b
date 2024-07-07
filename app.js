@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js';
 import verificationRoutes from "./routes/verificationRoute.js"
 import cors from "cors"
 import winston from 'winston';
@@ -132,7 +131,6 @@ app.use(express.json());
 // });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/content', categoryRoutes);
 app.use('/api/verification', verificationRoutes);
 app.get("/", (req,res)=>{
   return res.send({message:"api working"})

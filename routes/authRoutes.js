@@ -2,6 +2,7 @@
 import express from 'express';
 import { registerUser, authUser, refreshAccessToken, deleteUser } from '../controllers/authController.js';
 import { protect } from '../middlewares/authMiddleware.js';
+import { sendVerificationMail } from './verificationRoute.js';
 
 const router = express.Router();
 
@@ -17,6 +18,8 @@ router.get('/profile',protect,(req, res) => {
     user: req.user,
   });
 });
+
+router.post('/send-verification-mail',protect,sendVerificationMail);
 
 router.post('/delete-user',protect,deleteUser);
 export default router;

@@ -2,6 +2,7 @@
 import express from "express";
 import { protect } from "../middlewares/authMiddleware.js";
 import User from "../models/User.js";
+import { mail } from "../nodeMailer/nodeMailer.js";
 
 const router = express.Router();
 
@@ -55,19 +56,51 @@ router.get("/update-status", async (req, res) => {
         verificationStatus: response,
       });
     } catch (error) {
-      res.status(500).json({
+   return   res.status(500).json({
         message: `Server Error: ${error.message}`,
         success: false,
         status: 500,
       });
     }
   } catch (error) {
-    res.status(500).json({
+   return res.status(500).json({
       message: `Server Error: ${error.message}`,
       success: false,
       status: 500,
     });
   }
 });
+
+
+export const sendVerificationMail = async(req, res)=>{
+  try{
+
+    const user = req?.user
+    console.log(user)
+    if(!user)
+      return res.status(404).json({
+        message: `Auth Error: user not found.`,
+        success: false,
+        status: 404,
+      });
+
+
+      await mail("hr961992@gmail.com" ,user?.email, "Please Verify Your Email.",user?._id, user?.username )
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message:"user fetched successfully.",
+        user: req.user,
+      });
+
+  }catch(error){
+    console.log(error)
+   return res.status(500).json({
+      message: `Server Error: ${error.message}`,
+      success: false,
+      status: 500,
+    });
+  }
+}
 
 export default router;

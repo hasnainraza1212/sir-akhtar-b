@@ -48,16 +48,18 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 userSchema.methods.generateAccessToken=async function(){
   const user = this.toObject();
-  delete user.password
-  delete user.refreshToken
+  delete user?.password
+  delete user?.refreshToken
+  delete user?.accessToken
   const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, {expiresIn:"30d"})
   return accessToken
 
 }
 userSchema.methods.generateRefreshToken=async function(){
   const user = this.toObject()
-  delete user.password
-  delete user.refreshToken
+  delete user?.password
+  delete user?.refreshToken
+  delete user?.accessToken
   const refreshToken = jwt.sign(user, process.env.JWT_REFRESH_TOKEN_SECRET, {expiresIn:"365d"})
   return refreshToken
 
